@@ -69,3 +69,5 @@ while True:
     #end = pg.time.get_ticks()
 
     #totalTime = end-start
+
+#Still learning Pygame and all its functionalities, will finish board design and start main algorithm next week
