@@ -67,7 +67,7 @@ def draw_lines():
 def display_status():
     global draw
 
-    if winner == None:
+    if winner == "":
         message = XO.upper() + " 's Turn!"
     else:
         message = winner.upper() + " won!!!"
