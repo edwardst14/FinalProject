@@ -232,5 +232,5 @@ while True:
 #Initial Game screen Doesnt Work  
 #DRAW/TIE GAME DOESNT WORK YET
 #GAME DOESNT RESET WHEN THERE'S A DRAW
-    
+#still need AI feature for one player option
     
