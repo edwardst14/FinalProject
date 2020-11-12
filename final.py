@@ -92,7 +92,7 @@ def check_win():
             # this row won
             winner = board[row][0]
             #draw winning line 
-            pg.draw.line(game_display, (250,0,0), (0, (row + 1)*HEIGHT/3 -HEIGHT/6),\
+            pg.draw.line(game_display, (50,168,74), (0, (row + 1)*HEIGHT/3 -HEIGHT/6),\
                               (WIDTH, (row + 1)*HEIGHT/3 - HEIGHT/6 ), 4)
             break
     # check for winning columns
@@ -101,20 +101,20 @@ def check_win():
             # this column won
             winner = board[0][col]
             #draw winning line
-            pg.draw.line (game_display, (250,0,0),((col + 1)* WIDTH/3 - WIDTH/6, 0),\
+            pg.draw.line(game_display, (50,168,74),((col + 1)* WIDTH/3 - WIDTH/6, 0),\
                           ((col + 1)* WIDTH/3 - WIDTH/6, HEIGHT), 4)
             break
     # check for diagonal winners
     if (board[0][0] == board[1][1] == board[2][2]) and (board[0][0] != None):
         # game won diagonally left to right
         winner = board[0][0]
-        pg.draw.line (game_display, (250,70,70), (50, 50), (350, 350), 4)
+        pg.draw.line(game_display, (50,168,74), (50, 50), (350, 350), 4)
 
     # check 2nd diagonal winner
     if (board[0][2] == board[1][1] == board[2][0]) and (board[0][2] != None):
         # game won diagonally right to left
         winner = board[0][2]
-        pg.draw.line (game_display, (250,70,70), (350, 50), (50, 350), 4)
+        pg.draw.line (game_display, (50,168,74), (350, 50), (50, 350), 4)
 
     #DRAW DOESNT WORK
     if(all([all(row) for row in board]) and winner == None ):
