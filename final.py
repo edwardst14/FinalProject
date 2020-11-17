@@ -24,6 +24,7 @@ play2 = None
 
 #Define colors
 BLUE = (106, 159, 181)
+BLUE2 = (126, 179, 201)
 WHITE = (255, 255, 255)
 GRAY = (211,211,211)
 DARKGRAY = (128,128,128)
@@ -57,8 +58,13 @@ def button(msg, x, y, w, h, inactive, active, action=None):
     else:
         pygame.draw.rect(screen, inactive,(x,y,w,h))
 
-    smallText = pygame.font.SysFont("OpenSans-Regular.ttf",20)
-    textSurf, textRect = text_objects(msg, smallText)
+    if msg == "Rules":
+        smallText = pygame.font.SysFont("OpenSans-Regular.ttf", 20)
+        textSurf, textRect = text_objects(msg, smallText)
+        textSurf = textSurface = smallText.render(msg, True, (WHITE))
+    else:
+        smallText = pygame.font.SysFont("OpenSans-Regular.ttf", 28)
+        textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
     screen.blit(textSurf, textRect)
 
@@ -295,9 +301,11 @@ def mainScreen():
         screen.blit(title, titleRect)
 
         #Draw all three buttons on screen
-        button("Single Player", (WIDTH / 8), (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, single)
+        button("One Player", (WIDTH / 8), (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, single)
         button("Two Player", (WIDTH / 8) * 6, (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, multi)
         button("QUIT", (WIDTH / 8) * 3.5, (HEIGHT / 3) * 2, 125, 50, WHITE, GRAY, end)
+
+        button("Rules", (WIDTH / 8) - 90, (HEIGHT / 4) * 2 + 265, 55, 25, BLUE, BLUE2, filler2)
         pygame.display.flip() #can also use update here
 
 #------------------------------------------------------------------------------------
