@@ -1,8 +1,6 @@
 #Python Final Project
 #Start Date: 11/02/20
 
-
-
 #IMPORTS
 import pygame 
 import sys 
