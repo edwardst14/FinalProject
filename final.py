@@ -1,273 +1,306 @@
 #Python Final Project
 #Start Date: 11/02/20
 
+#RESTARTING IMPLEMENTATION
+
+#IMPORTS
 import pygame 
 import sys 
 import time 
 from pygame.locals import *
+import minmax as ttt
 
-
-#GLOABAL VARIABLES
-winner = ""
-XO = "x"
-draw = False
-
-timer = pygame.time.Clock()
-
-#board detail variables
-WIDTH = 400
-HEIGHT = 400
+#GLOBAL VARIABLES -- Board Details
+WIDTH = 800
+HEIGHT = 600
 board = [None]*3, [None]*3, [None]*3
 
-black = (0,0,0)
-white = (255,255,255)
-red = (200,0,0)
-green = (0,200,0)
-orange = (255,127,0)
-gray = (50,50,50)
-bright_red = (255,0,0)
-bright_green = (0,255,0)
-bright_orange = (255,215,0)
+#SINGLE PLAYER GAME DETAILS
+user = None
+board = ttt.initial_state()
+ai_turn = False
 
+#MULTIPLAYER GAME DETAILS
+play1 = None
+play2 = None
 
-#images 
-x_img = pygame.image.load("X2.png")
-o_img = pygame.image.load("O5.png")
-TTT = pygame.image.load("image2.jpeg")
-#resize images
-x_img = pygame.transform.scale(x_img, (100, 100))
-o_img = pygame.transform.scale(o_img, (100, 100))
-TTT = pygame.transform.scale(TTT, (WIDTH, HEIGHT+100))
-#########################################################################################
+#Define colors
+BLUE = (106, 159, 181)
+WHITE = (255, 255, 255)
+GRAY = (211,211,211)
+DARKGRAY = (128,128,128)
 
-#initialize all pygame functionalities
+#initialize pygame font and other functionalities
+pygame.font.init()
 pygame.init()
-fps = 30
+timer = pygame.time.Clock()
 
-#add 100 pixels to display for game status space
-gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT+100))
+#FONTS
+mediumFont = pygame.font.SysFont("OpenSans-Regular.ttf", 28)
+largeFont = pygame.font.SysFont("OpenSans-Regular.ttf", 40)
+moveFont = pygame.font.SysFont("OpenSans-Regular.ttf", 60)
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Tic-Tac-Toe")
-##########################################################################################
-def draw_lines():
-    gameDisplay.blit(TTT, (0,0))
-    pygame.display.update()
-    time.sleep(3)
-    gameDisplay.fill(white)
-
-    #vertical lines
-    pygame.draw.line(gameDisplay, black, [WIDTH/3,0], [WIDTH/3, HEIGHT], 2)
-    pygame.draw.line(gameDisplay, black, [WIDTH/3*2,0], [WIDTH/3*2, HEIGHT], 2)
-
-    #horizontal lines
-    pygame.draw.line(gameDisplay, black, [0,HEIGHT/3], [WIDTH, HEIGHT/3], 2)
-    pygame.draw.line(gameDisplay, black, [0,HEIGHT/3*2], [WIDTH, HEIGHT/3*2], 2)
-    display_status()
-###############################################################################################
-def display_status():
-    global draw
-
-    if winner == "":
-        message = XO.upper() + " 's Turn!"
-    else:
-        message = winner.upper() + " won!!!"
-    if draw:
-        message = "It's a Draw!"
-
-    #font
-    font = pygame.font.Font(None, 30)
-    text = font.render(message, 1, white)
-
-    #display message
-    gameDisplay.fill(black, (0, 400, 500, 100))
-    text_rect = text.get_rect(center = (WIDTH/2, 500-50))
-    gameDisplay.blit(text, text_rect)
-    pygame.display.update()
-################################################################################################
-def check_win():
-    global board, winner,draw
-    # check for winning rows
-    for row in range (0,3):
-        if ((board[row][0] == board[row][1] == board[row][2]) and (board[row][0] != None)):
-            # this row won
-            winner = board[row][0]
-            #draw winning line 
-            pygame.draw.line(gameDisplay, (50,168,74), (0, (row + 1)*HEIGHT/3 -HEIGHT/6),\
-                              (WIDTH, (row + 1)*HEIGHT/3 - HEIGHT/6 ), 4)
-            break
-    # check for winning columns
-    for col in range (0, 3):
-        if (board[0][col] == board[1][col] == board[2][col]) and (board[0][col] != None):
-            # this column won
-            winner = board[0][col]
-            #draw winning line
-            pygame.draw.line(gameDisplay, (50,168,74),((col + 1)* WIDTH/3 - WIDTH/6, 0),\
-                          ((col + 1)* WIDTH/3 - WIDTH/6, HEIGHT), 4)
-            break
-    # check for diagonal winners
-    if (board[0][0] == board[1][1] == board[2][2]) and (board[0][0] != None):
-        # game won diagonally left to right
-        winner = board[0][0]
-        pygame.draw.line(gameDisplay, (50,168,74), (50, 50), (350, 350), 4)
-
-    # check 2nd diagonal winner
-    if (board[0][2] == board[1][1] == board[2][0]) and (board[0][2] != None):
-        # game won diagonally right to left
-        winner = board[0][2]
-        pygame.draw.line (gameDisplay, (50,168,74), (350, 50), (50, 350), 4)
-
-    if(all([all(row) for row in board]) and winner == "" ):
-        draw = True
-    display_status()
-############################################################################################################
-def drawXO(row, col): 
-    global board, XO 
-    
-    #first row
-    if row == 1: 
-        posx = 30 # was previously 50
-          
-    #second row    
-    if row == 2: 
-        posx = WIDTH / 3 + 30
-          
-    if row == 3: 
-        posx = WIDTH / 3 * 2 + 30
-   
-    if col == 1: 
-        posy = 30 #was previously 70
-          
-    if col == 2: 
-        posy = HEIGHT / 3 + 30
-      
-    if col == 3: 
-        posy = HEIGHT / 3 * 2 + 30
-          
-    # set up board  
-    board[row-1][col-1] = XO 
-    if(XO == 'x'): 
-        #display x image in correct position
-        gameDisplay.blit(x_img, (posy, posx)) 
-        XO = 'o'
-    else: 
-        #display o image in correct position
-        gameDisplay.blit(o_img, (posy, posx)) 
-        XO = 'x'
-    pygame.display.update() 
-############################################################################################################
-def user_click(): 
-    # get coordinates of mouse click 
-    x, y = pygame.mouse.get_pos() 
-   
-    # get column of mouse click (1-3) 
-    if (x < WIDTH / 3): 
-        col = 1
-    elif (x < WIDTH / 3 * 2): 
-        col = 2
-    elif(x < WIDTH): 
-        col = 3
-    else: 
-        col = None
-   
-    # get row of mouse click (1-3) 
-    if (y < HEIGHT / 3): 
-        row = 1
-    elif (y < HEIGHT / 3 * 2): 
-        row = 2
-    elif (y < HEIGHT): 
-        row = 3 
-    else: 
-        row = None
-    #print(row,col)
-        
-    # place image in correct position
-    if(row and col and board[row - 1][col - 1] == None): 
-        global XO 
-        drawXO(row, col) 
-        check_win() 
-################################################################################################################
-def reset_game():
-    #reset all gloabl variables
-    global board, winner, XO, draw
-    time.sleep(3)
-    XO = 'x'
-    draw = False
-    draw_lines()
-    winner = ""
-    board = [[None]*3,[None]*3,[None]*3]
-##########################################################################################################
-def game_loop():
-    draw_lines()
-    while True:
-        for ev in pygame.event.get():
-            if ev.type == QUIT or (
-                ev.type == KEYDOWN and (
-                    ev.key == K_ESCAPE or
-                    ev.key == K_q
-                )):
-                pygame.quit()
-                quit()
-            elif ev.type == MOUSEBUTTONDOWN:
-                #activate user_click()
-                user_click()
-                if (winner != "" or draw == True):
-                    reset_game()
-                #print("got here!!")
-        pygame.display.update()
-        timer.tick(fps)
-
-def quitgame():
-    pygame.quit()
 
 def text_objects(text, font):
-    textSurface = font.render(text, True, (white))
+    textSurface = font.render(text, True, (DARKGRAY))
     return textSurface, textSurface.get_rect()
-
-def message_display(text):
-    largeText = pygame.font.Font('freesansbold.ttf',75)
-    TextSurf, TextRect = text_objects(text, largeText)
-    TextRect.center = ((WIDTH/2),(HEIGHT/2))
-    game_display.blit(TextSurf, TextRect,)
-
-def game_intro():
-    intro = True
-
-    while intro:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-        gameDisplay.fill(white)
-
-        titleText = gameDisplay.blit(x_img, (170, 200))    # title is an image
-        titleText.center = ((WIDTH / 2), (HEIGHT / 2))
-
-        # button(msg, x, y, w, h, inactive, active, action=None)
-        button("PLAY", 50, 350, 98, 40, green, bright_green, game_loop)
-        button("Quit",275,350,98,40,red,bright_red,quitgame)
-
-        pygame.display.update()
-        timer.tick(15)
-#you can call this menu above your game loop.
-
 
 def button(msg, x, y, w, h, inactive, active, action=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
-    #print(click)
+
     if x+w > mouse[0] > x and y+h > mouse[1] > y:
-        pygame.draw.rect(gameDisplay, active,(x,y,w,h))
+        pygame.draw.rect(screen, active,(x,y,w,h))
 
         if click[0] == 1 and action != None:
             action()         
     else:
-        pygame.draw.rect(gameDisplay, inactive,(x,y,w,h))
+        pygame.draw.rect(screen, inactive,(x,y,w,h))
 
-    smallText = pygame.font.SysFont("comicsansms",20)
+    smallText = pygame.font.SysFont("OpenSans-Regular.ttf",20)
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
-    gameDisplay.blit(textSurf, textRect)
+    screen.blit(textSurf, textRect)
 
+def singlePlay():
+    print("single player screen")
+    
+    global user, board, ai_turn
 
+    while True:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT or (
+                    ev.type == KEYDOWN and (
+                        ev.key == K_ESCAPE or
+                        ev.key == K_q
+                    )):
+                    end()
+        screen.fill(BLUE)
 
-game_intro()
+        #User chooses a player
+        if user == None:
+            #Draw selection screen
+            title = largeFont.render("Select a Letter", True, WHITE)
+            titleRect = title.get_rect()
+            titleRect.center = ((WIDTH / 2), 50)
+            screen.blit(title, titleRect)
+
+            button("Play as X", (WIDTH / 8), 3 * (HEIGHT / 4), (WIDTH / 4), 50, WHITE, GRAY, setUserX)
+            button("Play as O", (WIDTH / 8) * 5, 3 * (HEIGHT / 4), (WIDTH / 4), 50, WHITE, GRAY, setUserO)
+
+        else:
+            #Draw game board
+            tile_size = 115
+            tile_origin = (WIDTH / 2 - (1.5 * tile_size),
+                            HEIGHT / 2 - (1.5 * tile_size))
+            tiles = []
+            for i in range(3):
+                row = []
+                for j in range(3):
+                    rect = pygame.Rect(
+                        tile_origin[0] + j * tile_size,
+                        tile_origin[1] + i * tile_size,
+                        tile_size, tile_size
+                    )
+                    pygame.draw.rect(screen, DARKGRAY, rect, 3)
+
+                    if board[i][j] != ttt.EMPTY:
+                        move = moveFont.render(board[i][j], True, WHITE)
+                        moveRect = move.get_rect()
+                        moveRect.center = rect.center
+                        screen.blit(move, moveRect)
+                    row.append(rect)
+                tiles.append(row)
+
+            game_over = ttt.terminal(board)
+            player = ttt.player(board)
+
+            #show game title
+            if game_over:
+                winner = ttt.winner(board)
+                if winner is None:
+                    title = "Game Over: Draw!"
+                else:
+                    title = "Game Over: {} wins!".format(winner)
+            elif user == player:
+                title = "Playing as {}".format(user)
+            else:
+                title = "Computer thinking..."
+            title = largeFont.render(title, True, GRAY)
+            titleRect = title.get_rect()
+            titleRect.center = ((WIDTH / 2), 30)
+            screen.blit(title, titleRect)
+
+            player, game_over, board, tiles = minimax(player, game_over, board, tiles)
+
+            if game_over:
+                button("Play Again", (WIDTH / 3), (HEIGHT - 65), (WIDTH / 3), 50, WHITE, GRAY, reset)
+
+        pygame.display.update()
+
+def reset():
+    global user, board, ai_turn, play1, play2
+
+    time.sleep(0.5)
+    user = None
+    board = ttt.initial_state()
+    ai_turn = False
+
+    play1 = None
+    play2 = None
+    
+def minimax(player, game_over, board, tiles):
+    # Check for AI move
+    global ai_turn
+
+    if user != player and not game_over:
+        if ai_turn:
+            time.sleep(0.5)
+            move = ttt.minimax(board)
+            board = ttt.result(board, move)
+            ai_turn = False
+        else:
+            ai_turn = True
+
+    # Check for a user move
+    click, _, _ = pygame.mouse.get_pressed()
+    if click == 1 and user == player and not game_over:
+        mouse = pygame.mouse.get_pos()
+        for i in range(3):
+            for j in range(3):
+                if (board[i][j] == ttt.EMPTY and tiles[i][j].collidepoint(mouse)):
+                    board = ttt.result(board, (i, j))
+
+    return player, game_over, board, tiles
+
+def setUserX():
+    global user
+
+    timer.tick(1)
+    user = ttt.X
+    print(user)
+    print("works when X button is clicked")
+    
+def setUserO():
+    global user
+
+    timer.tick(1)
+    user = ttt.O
+    print(user)
+    print("works when O button is clicked")
+
+def single():
+    print("going to diff screen")
+
+    singlePlay()
+
+def filler2():
+    print("works fine")
+
+def multiPlay():
+    print("multiplayer screen")
+    global board
+
+    while True:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT or (
+                    ev.type == KEYDOWN and (
+                        ev.key == K_ESCAPE or
+                        ev.key == K_q
+                    )):
+                    end()
+        screen.fill(BLUE)
+        play1 = ttt.X
+        play2 = ttt.O
+
+        #Draw game board
+        tile_size = 115
+        tile_origin = (WIDTH / 2 - (1.5 * tile_size),
+                        HEIGHT / 2 - (1.5 * tile_size))
+        tiles = []
+        for i in range(3):
+            row = []
+            for j in range(3):
+                rect = pygame.Rect(
+                    tile_origin[0] + j * tile_size,
+                    tile_origin[1] + i * tile_size,
+                    tile_size, tile_size
+                )
+                pygame.draw.rect(screen, DARKGRAY, rect, 3)
+
+                if board[i][j] != ttt.EMPTY:
+                    move = moveFont.render(board[i][j], True, WHITE)
+                    moveRect = move.get_rect()
+                    moveRect.center = rect.center
+                    screen.blit(move, moveRect)
+                row.append(rect)
+            tiles.append(row)
+
+        game_over = ttt.terminal(board)
+        player = ttt.player(board)
+
+        if game_over:
+            winner = ttt.winner(board)
+            if winner is None:
+                title = "Game Over: Draw!"
+            else:
+                title = "Game Over: {} wins!".format(winner)
+        elif play1 == player:
+            title = "Play as {}".format(play1)
+        else:
+            title = "Play as {}".format(play2)
+        title = largeFont.render(title, True, WHITE)
+        titleRect = title.get_rect()
+        titleRect.center = ((WIDTH / 2), 30)
+        screen.blit(title, titleRect)
+        
+        click, _, _ = pygame.mouse.get_pressed()
+        if click == 1 and not game_over:
+            mouse = pygame.mouse.get_pos()
+            for i in range(3):
+                for j in range(3):
+                    if (board[i][j] == ttt.EMPTY and tiles[i][j].collidepoint(mouse)):
+                        board = ttt.result(board, (i, j))
+
+        if game_over:
+            button("Play Again", (WIDTH / 3), (HEIGHT - 65), (WIDTH / 3), 50, WHITE, GRAY, reset)
+
+        pygame.display.update()
+
+def multi():
+    print("going to different screen")
+
+    multiPlay()
+
+def end():
+    pygame.quit()
+    sys.exit()
+#---------------------------------------------------------------------
+def mainScreen():
+    while True:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT or (
+                    ev.type == KEYDOWN and (
+                        ev.key == K_ESCAPE or
+                        ev.key == K_q
+                    )):
+                    end()
+
+        screen.fill(BLUE)
+
+        #Draw on main screen
+        title = largeFont.render("Play Tic-Tac-Toe", True, WHITE)
+        titleRect = title.get_rect()
+        titleRect.center = ((WIDTH / 2), 50)
+        screen.blit(title, titleRect)
+
+        #Draw all three buttons on screen
+        button("Single Player", (WIDTH / 8), (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, single)
+        button("Two Player", (WIDTH / 8) * 6, (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, multi)
+        button("QUIT", (WIDTH / 8) * 3.5, (HEIGHT / 3) * 2, 125, 50, WHITE, GRAY, end)
+        pygame.display.flip() #can also use update here
+
+#------------------------------------------------------------------------------------
+mainScreen()
