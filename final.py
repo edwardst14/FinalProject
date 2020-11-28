@@ -3,12 +3,16 @@
 
 #IMPORTS
 import pygame 
+import pygame as pg
 import sys 
 import time 
 from pygame.locals import *
 import minmax as ttt
+from tkinter import *
+from tkinter import messagebox
+import sqlite3
 
-#GLOBAL VARIABLES -- Board Details
+#GLOBAL VARIABLES
 WIDTH = 800
 HEIGHT = 600
 board = [None]*3, [None]*3, [None]*3
@@ -22,25 +26,96 @@ ai_turn = False
 play1 = None
 play2 = None
 
-#Define colors
+#define colors
 BLUE = (106, 159, 181)
-BLUE2 = (126, 179, 201)
 WHITE = (255, 255, 255)
 GRAY = (211,211,211)
 DARKGRAY = (128,128,128)
+COLOR_INACTIVE = pg.Color('lightskyblue3')
+COLOR_ACTIVE = pg.Color('dimgray')
 
 #initialize pygame font and other functionalities
 pygame.font.init()
 pygame.init()
+conn = sqlite3.connect("scores.sqlite") #creates the database if it doesn't already exist
+cursor = conn.cursor() #provides are cursor to the above connection (the means of executing the SQL queries)
+#cursor.execute("create table playerScores (name text, wins integer, losses integer)") #execute the create table query
+
+fps = 30 #MAY DELETE
 timer = pygame.time.Clock()
+FONT = pg.font.Font(None, 32)
+NAME = ""
 
 #FONTS
 mediumFont = pygame.font.SysFont("OpenSans-Regular.ttf", 28)
 largeFont = pygame.font.SysFont("OpenSans-Regular.ttf", 40)
 moveFont = pygame.font.SysFont("OpenSans-Regular.ttf", 60)
 
+#add 100 pixels to display for game status space
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Tic-Tac-Toe")
+
+#-----------------------------------------------------------------
+class InputBox:
+
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pg.Rect(x, y, w, h)
+        self.color = COLOR_INACTIVE
+        self.text = text
+        self.txt_surface = FONT.render(text, True, self.color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            # If the user clicked on the input_box rect.
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = not self.active
+            else:
+                self.active = False
+            # Change the current color of the input box.
+            self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
+        if event.type == pg.KEYDOWN:
+            if self.active:
+                if event.key == pg.K_RETURN:
+                    print(self.text)
+                    entry = cursor.execute("SELECT *        \
+                            FROM playerScores               \
+                                WHERE name = ?;", [self.text])
+
+                    
+                    data = entry.fetchall()
+                    print(data)
+                    if len(data) != 0:
+                        print("Alreaady Exists")
+                    else: 
+                        cursor.execute("INSERT INTO    \
+                            playerScores(name, wins, losses)    \
+                            VALUES(?,?,?)", [self.text, 0, 0])
+
+                    conn.commit()
+                    NAME = self.text
+                    self.text = ''
+                elif event.key == pg.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    if event.unicode.isalpha():
+                        self.text += event.unicode
+
+                # Re-render the text.
+                self.txt_surface = FONT.render(self.text, True, self.color)
+
+    def update(self):
+        # Resize the box if the text is too long.
+        width = max(200, self.txt_surface.get_width()+10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        # Blit the rect.
+        pg.draw.rect(screen, self.color, self.rect, 2)
+#----------------------------------------------------------------------
 
 def text_objects(text, font):
     textSurface = font.render(text, True, (DARKGRAY))
@@ -58,13 +133,8 @@ def button(msg, x, y, w, h, inactive, active, action=None):
     else:
         pygame.draw.rect(screen, inactive,(x,y,w,h))
 
-    if msg == "Rules":
-        smallText = pygame.font.SysFont("OpenSans-Regular.ttf", 20)
-        textSurf, textRect = text_objects(msg, smallText)
-        textSurf = textSurface = smallText.render(msg, True, (WHITE))
-    else:
-        smallText = pygame.font.SysFont("OpenSans-Regular.ttf", 28)
-        textSurf, textRect = text_objects(msg, smallText)
+    smallText = pygame.font.SysFont("OpenSans-Regular.ttf",20)
+    textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ( (x+(w/2)), (y+(h/2)) )
     screen.blit(textSurf, textRect)
 
@@ -72,6 +142,7 @@ def singlePlay():
     print("single player screen")
     
     global user, board, ai_turn
+    #print(user)
 
     while True:
         for ev in pygame.event.get():
@@ -83,7 +154,7 @@ def singlePlay():
                     end()
         screen.fill(BLUE)
 
-        #User chooses a player
+        #let user choose a player
         if user == None:
             #Draw selection screen
             title = largeFont.render("Select a Letter", True, WHITE)
@@ -96,6 +167,7 @@ def singlePlay():
 
         else:
             #Draw game board
+
             tile_size = 115
             tile_origin = (WIDTH / 2 - (1.5 * tile_size),
                             HEIGHT / 2 - (1.5 * tile_size))
@@ -182,7 +254,7 @@ def minimax(player, game_over, board, tiles):
 def setUserX():
     global user
 
-    timer.tick(1)
+    timer.tick(3)
     user = ttt.X
     print(user)
     print("works when X button is clicked")
@@ -190,7 +262,7 @@ def setUserX():
 def setUserO():
     global user
 
-    timer.tick(1)
+    timer.tick(3)
     user = ttt.O
     print(user)
     print("works when O button is clicked")
@@ -205,7 +277,7 @@ def filler2():
 
 def multiPlay():
     print("multiplayer screen")
-    global board
+    global board, NAME
 
     while True:
         for ev in pygame.event.get():
@@ -279,10 +351,14 @@ def multi():
     multiPlay()
 
 def end():
+    conn.close()
     pygame.quit()
     sys.exit()
 #---------------------------------------------------------------------
 def mainScreen():
+    input_box1 = InputBox((WIDTH / 8) * 3.1, (HEIGHT / 3), 125, 50)
+    #input_box2 = InputBox(100, 300, 140, 32)
+    input_boxes = [input_box1]
     while True:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT or (
@@ -291,8 +367,16 @@ def mainScreen():
                         ev.key == K_q
                     )):
                     end()
+            for box in input_boxes:
+                box.handle_event(ev)
+
+        for box in input_boxes:
+            box.update()
 
         screen.fill(BLUE)
+        #pygame.display.flip() #can also use update here
+        for box in input_boxes:
+            box.draw(screen)
 
         #Draw on main screen
         title = largeFont.render("Play Tic-Tac-Toe", True, WHITE)
@@ -300,13 +384,17 @@ def mainScreen():
         titleRect.center = ((WIDTH / 2), 50)
         screen.blit(title, titleRect)
 
+        title2 = mediumFont.render("Enter Name:", True, WHITE)
+        titleRect = title2.get_rect()
+        titleRect.center = ((WIDTH / 2), 175)
+        screen.blit(title2, titleRect)
+
         #Draw all three buttons on screen
-        button("One Player", (WIDTH / 8), (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, single)
+        button("Single Player", (WIDTH / 8), (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, single)
         button("Two Player", (WIDTH / 8) * 6, (HEIGHT / 4) * 2, 125, 50, WHITE, GRAY, multi)
         button("QUIT", (WIDTH / 8) * 3.5, (HEIGHT / 3) * 2, 125, 50, WHITE, GRAY, end)
-
-        button("Rules", (WIDTH / 8) - 90, (HEIGHT / 4) * 2 + 265, 55, 25, BLUE, BLUE2, filler2)
         pygame.display.flip() #can also use update here
+
 
 #------------------------------------------------------------------------------------
 mainScreen()
