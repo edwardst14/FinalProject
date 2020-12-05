@@ -5,7 +5,7 @@ X = "X"
 O = "O"
 EMPTY = None
 
-
+#Initial board state
 def initial_state():
     """
     Returns starting state of the board.
