@@ -10,4 +10,6 @@ Installion: <br />
 Use python3 -m pip install -U pygame --user to install Pygame <br />
 Use python3 -m pygame.examples.aliens to check if Pygame is correctly installed <br />
 
+Simply download the files from this repo and run python3 final.py <br />
+After installing the required dependencies
 
