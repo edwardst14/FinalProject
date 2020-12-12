@@ -7,4 +7,5 @@ def testConnection():
 	db.getUserByName("Gula")
 	player = Player("Gula", 100, 100)
 	db.updateUserScores(player)
+	db.displayScores()
 

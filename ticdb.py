@@ -61,6 +61,7 @@ class DBConnection:
 			ORDER BY Wins DESC")
 
 		self.SCORES = data.fetchall()
+		print(self.SCORES)
 		return self.SCORES
 		self.conn.commit()
 
