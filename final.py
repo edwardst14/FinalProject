@@ -1,11 +1,6 @@
 #Python Final Project
 #Start Date: 11/02/20
-#End Date: 12/05/20
-
-#MOST RECENT FILE
-''' missing screen to display user scores - top 5 only
-       missing error handling of user entering more than 2 names on multiplayer screen
-       make input boxes disappear??? IS THAT ENOUGH '''
+#End Date: 12/12/20
 
 #IMPORTS
 import pygame, sys, time
