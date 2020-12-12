@@ -57,7 +57,6 @@ class InputBox:
                 else:
                     if event.unicode.isalpha():
                         self.text += event.unicode
-
                 # Re-render the text.
                 self.txt_surface = FONT.render(self.text, True, self.color)
 

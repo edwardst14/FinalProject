@@ -8,15 +8,20 @@ class DBConnection:
 		self.cursor = self.conn.cursor() #provides are cursor to the above connection (the means of executing the SQL queries)
 		#execute the create table query
 		try:
-			self.cursor.execute("create table playerScores (name text, wins integer, losses integer)")
+			self.cursor.execute("CREATE TABLE playerScores \
+					(ID integer PRIMARY KEY AUTOINCREMENT,		\
+					Name text,						\
+					Wins integer, 					\
+					Losses integer)")
 		except:
 			print("Database already exists")
+		self.SCORES = []
 
 
 	def getUserByName(self,name):
 		entry = self.cursor.execute("SELECT *        \
                 FROM playerScores               \
-                WHERE name = ?;", [name])
+                WHERE Name = ?;", [name])
 
 		data = entry.fetchall()
 		#print(data)
@@ -25,26 +30,41 @@ class DBConnection:
 			print(data)
 		else:
 			self.cursor.execute("INSERT INTO    \
-			playerScores(name, wins, losses)    \
+			playerScores(Name, Wins, Losses)    \
 			VALUES(?,?,?)", [name, 0, 0])
 
 			self.conn.commit()
 
 			new = self.cursor.execute("SELECT *        \
                 FROM playerScores               \
-                WHERE name = ?;", [name])
+                WHERE Name = ?;", [name])
 			data = new.fetchall()
 			print(data)
 
-		return Player(data[0][0], data[0][1], data[0][2]) #FIXED
+		return Player(data[0][0], data[0][1], data[0][2], data[0][3]) #FIXED
 
 	def updateUserScores(self, player):
 			if not player:
 				return
 		
-			self.cursor.execute("update playerscores \
-			set  wins = ?, losses=? \
-			where name=?", [player.wins, player.losses, player.name])
+			self.cursor.execute("UPDATE playerscores \
+			SET Wins = ?, Losses=? \
+			WHERE ID = ?", [player.wins, player.losses, player.id])
 			self.conn.commit()
+
+	def displayScores(self):
+		data = self.cursor.execute("SELECT Name, Wins	\
+			FROM playerscores	\
+			WHERE Wins in (SELECT Wins	\
+						FROM playerscores	\
+						ORDER BY Wins DESC LIMIT 3)	\
+			ORDER BY Wins DESC")
+
+		self.SCORES = data.fetchall()
+		return self.SCORES
+		self.conn.commit()
+
+
+		
 			
 
